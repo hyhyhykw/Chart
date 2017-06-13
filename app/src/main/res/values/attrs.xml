@@ -29,4 +29,8 @@
         </attr>
         <attr name="arcDiameter" format="dimension|reference"/>
     </declare-styleable>
+
+    <declare-styleable name="LineChartView">
+        <attr name="showPoint" format="boolean"/>
+    </declare-styleable>
 </resources>

@@ -10,6 +10,7 @@ import android.graphics.PointF;
  */
 
 public class MyPointF extends PointF {
+
     public MyPointF() {
     }
 
@@ -24,4 +25,6 @@ public class MyPointF extends PointF {
     public float getDistance(PointF pointF) {
         return (float) Math.hypot(pointF.x - this.x, pointF.y - this.y);
     }
+
+
 }
