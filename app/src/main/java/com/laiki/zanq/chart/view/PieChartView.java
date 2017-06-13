@@ -1,4 +1,4 @@
-package com.laiki.zanq.library.view;
+package com.laiki.zanq.chart.view;
 
 import android.content.Context;
 import android.content.res.TypedArray;
@@ -10,8 +10,8 @@ import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 import android.view.View;
 
-import com.laiki.zanq.library.R;
-import com.laiki.zanq.library.utils.Logger;
+import com.laiki.zanq.chart.R;
+import com.laiki.zanq.chart.utils.Logger;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -48,7 +48,7 @@ public class PieChartView extends View {
     }
 
     private List<String> keyList = new ArrayList<>();
-    private static final float NOT_SET_DIA = -1;
+    private static final int NOT_SET_DIA = -1;
 
     private static final int TOP = -1;
     private static final int BOTTOM = -2;
@@ -58,15 +58,15 @@ public class PieChartView extends View {
 
 
     private int[] colors = new int[]{
-            0xd667cd,
-            0xb50606,
-            0x8A2BE2,
-            0xffbb33,
-            0x66cc33,
-            0x1122cc,
-            0xff8c00,
-            0x00b810,
-            0x33ccff
+            0xffd667cd,
+            0xffb50606,
+            0xff8A2BE2,
+            0xffffbb33,
+            0xff66cc33,
+            0xff1122cc,
+            0xffff8c00,
+            0xff00b810,
+            0xff33ccff
     };
 
     public PieChartView(Context context) {
@@ -82,7 +82,7 @@ public class PieChartView extends View {
         // 获取自定义属性
         TypedArray ta = context.getTheme().obtainStyledAttributes(attrs,
                 R.styleable.PieChartView, defStyleAttr, 0);
-        int place = ta.getInt(R.styleable.PieChartView_place, 0);
+        int place = ta.getInt(R.styleable.PieChartView_place, CENTER);
         switch (place) {
             case TOP:
                 mPlace = Place.TOP;
@@ -102,7 +102,7 @@ public class PieChartView extends View {
         }
 
         isShowText = ta.getBoolean(R.styleable.PieChartView_showText, true);
-        arcDiameter = ta.getFloat(R.styleable.PieChartView_arcDiameter, NOT_SET_DIA);
+        arcDiameter = ta.getDimensionPixelSize(R.styleable.PieChartView_arcDiameter, NOT_SET_DIA);
         startAngle = ta.getFloat(R.styleable.PieChartView_startAngle, -90);
         ta.recycle();
         arcPaint = new Paint();
@@ -112,9 +112,9 @@ public class PieChartView extends View {
         textPaint = new Paint();
         textPaint.setAntiAlias(true);
         textPaint.setColor(Color.BLACK);
-
-        sum = calculateSum();
+//        setBackgroundColor(Color.BLACK);
         defaultMap();
+        sum = calculateSum();
     }
 
     private void defaultMap() {
@@ -159,6 +159,7 @@ public class PieChartView extends View {
             // 如果布局里面没有设置固定值,这里取布局的高度的2/5
             height = heightSize * 2 / 5;
         }
+
         setMeasuredDimension(width, height);
 
         int min = Math.min(width, height);
@@ -167,23 +168,26 @@ public class PieChartView extends View {
         if (arcDiameter == NOT_SET_DIA) {
             arcDiameter = min - dp2px(20);
         }
-        //防止弧形半径太大
-        if (arcDiameter > min) throw new UnsupportedOperationException("arc diameter is too large");
+//        //防止弧形半径太大
+//        if (arcDiameter > min) throw new UnsupportedOperationException("arc diameter is too large");
+
 
         //重新确定位置，防止绘图错误
-        if (min == height) {
-            if (mPlace == Place.TOP || mPlace == Place.BOTTOM) {
-                mPlace = Place.CENTER;
+        if (height != width)
+            if (min == height) {
+                if (mPlace == Place.TOP || mPlace == Place.BOTTOM) {
+                    mPlace = Place.CENTER;
+                }
+            } else if (min == width) {
+                if (mPlace == Place.LEFT || mPlace == Place.RIGHT) {
+                    mPlace = Place.CENTER;
+                }
             }
-        } else if (min == width) {
-            if (mPlace == Place.LEFT || mPlace == Place.RIGHT) {
-                mPlace = Place.CENTER;
-            }
-        }
 
         float arcSize = (width - arcDiameter) / 2;
         float arcSizeW = (height - arcDiameter) / 2;
 
+        Logger.e(String.valueOf(arcDiameter));
         switch (mPlace) {
             case TOP:
                 arcRectF.set(arcSize, 0, arcSize + arcDiameter, arcDiameter);
@@ -201,28 +205,33 @@ public class PieChartView extends View {
                 arcRectF.set(arcSize, arcSizeW, arcSize + arcDiameter, arcSizeW + arcDiameter);
                 break;
         }
+
+
     }
 
 
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
-        float top = getTop() - getTitleBarHeight();
-        float bottom = getBottom();
-        float right = getRight();
-        float left = getLeft();
+//        float top = getTop() - getTitleBarHeight();
+//        float bottom = getBottom();
+//        float right = getRight();
+//        float left = getLeft();
 
         float startAngle = this.startAngle;
-        tempRectF.set(left + arcRectF.left,
-                top + arcRectF.top,
-                right - arcRectF.right,
-                bottom - arcRectF.bottom);
+        tempRectF.set(arcRectF);
 
-//        float centerX = tempRectF.right - tempRectF.width() / 2;
-//        float centerY = tempRectF.bottom - tempRectF.height() / 2;
+        Logger.e(String.valueOf(arcRectF.left));
+        Logger.e(String.valueOf(arcRectF.top));
+        Logger.e(String.valueOf(arcRectF.right));
+        Logger.e(String.valueOf(arcRectF.bottom));
+        float centerX = tempRectF.right - tempRectF.width() / 2;
+        float centerY = tempRectF.bottom - tempRectF.height() / 2;
 
 //        MyPointF centerPoint = new MyPointF(centerX, centerY);
 
+//        canvas.drawCircle(centerX,centerY,50,textPaint);
+//        canvas.drawRect(tempRectF,textPaint);
         if (!keyList.isEmpty()) keyList.clear();
         keyList.addAll(map.keySet());
         Collections.sort(keyList);
@@ -230,6 +239,8 @@ public class PieChartView extends View {
         for (int i = 0; i < keyList.size(); i++) {
             float occPer = getOccupyPercent(keyList.get(i));
             float sweepAngle = occPer * 360;
+            Logger.e("startAngle=" + startAngle);
+            Logger.e("sweepAngle=" + sweepAngle);
             if (i > colors.length - 1) {
                 arcPaint.setColor(colors[(i % 9 + 2) % 9]);
             } else {
@@ -237,6 +248,7 @@ public class PieChartView extends View {
             }
 
             canvas.drawArc(tempRectF, startAngle, sweepAngle, true, arcPaint);
+
 //            if (isShowText) {
 //                String text = format(occPer);
 ////                canvas.save();

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- 直方图自定义属性 -->
+    <declare-styleable name="HistogramView">
+        <attr name="textColor" format="color"/>
+        <attr name="pillColor" format="color"/>
+        <attr name="lineColor" format="color"/>
+        <attr name="pillWidth" format="dimension"/>
+        <attr name="dividerWidth" format="dimension"/>
+    </declare-styleable>
+
+    <declare-styleable name="PieChartView">
+        <!-- place 用于获取宽高不同时的位置 -->
+        <attr name="place" format="integer">
+            <enum name="top" value="-1"/>
+            <enum name="bottom" value="-2"/>
+            <enum name="center" value="0"/>
+            <enum name="left" value="1"/>
+            <enum name="right" value="2"/>
+        </attr>
+        <!-- 是否显示文字 -->
+        <attr name="showText" format="boolean"/>
+        <!-- 起始角度 -->
+        <attr name="startAngle" format="float">
+            <enum name="tv" value="-90"/>
+            <enum name="rh" value="0"/>
+            <enum name="bv" value="90"/>
+            <enum name="lh" value="180"/>
+        </attr>
+        <attr name="arcDiameter" format="dimension|reference"/>
+    </declare-styleable>
+</resources>
