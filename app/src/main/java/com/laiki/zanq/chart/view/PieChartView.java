@@ -8,7 +8,6 @@ import android.graphics.Paint;
 import android.graphics.RectF;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
-import android.view.View;
 
 import com.laiki.zanq.chart.R;
 import com.laiki.zanq.chart.utils.Logger;
@@ -16,9 +15,7 @@ import com.laiki.zanq.chart.utils.Logger;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Created time : 2017/6/13 11:33.
@@ -26,9 +23,8 @@ import java.util.Map;
  * @author HY
  */
 
-public class PieChartView extends View {
+public class PieChartView extends ChartView {
     private float arcDiameter;
-    private Map<String, Float> map = new HashMap<>();
 
     private int contentTop;// 顶部的高度
     private Paint textPaint;
@@ -44,7 +40,7 @@ public class PieChartView extends View {
     private float sum;
 
     private enum Place {
-        LEFT, RIGHT, TOP, BOTTOM, CENTER;
+        LEFT, RIGHT, TOP, BOTTOM, CENTER
     }
 
     private List<String> keyList = new ArrayList<>();
@@ -113,65 +109,24 @@ public class PieChartView extends View {
         textPaint.setAntiAlias(true);
         textPaint.setColor(Color.BLACK);
 //        setBackgroundColor(Color.BLACK);
-        defaultMap();
         sum = calculateSum();
     }
 
-    private void defaultMap() {
-        map.put("1", 125f);
-        map.put("2", 236f);
-        map.put("3", 354f);
-        map.put("4", 273f);
-        map.put("5", 100f);
-        map.put("6", 432f);
-    }
 
     public void setContentTop(int contentTop) {
         this.contentTop = contentTop;
         invalidate();
     }
 
-    public void setData(Map<String, Float> map) {
-        this.map = map;
-    }
-
     @Override
-    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-        int widthMode = MeasureSpec.getMode(widthMeasureSpec);
-        int widthSize = MeasureSpec.getSize(widthMeasureSpec);
-        int heightMode = MeasureSpec.getMode(heightMeasureSpec);
-        int heightSize = MeasureSpec.getSize(heightMeasureSpec);
-
-        // 如果布局里面设置的是固定值,这里取布局里面的固定值;如果设置的是match_parent,则取父布局的大小
-        int width;
-        if (widthMode == MeasureSpec.EXACTLY) {
-            width = widthSize;
-        } else {
-            // 如果布局里面没有设置固定值,这里取布局的宽度
-            width = widthSize;
-        }
-
-        int height;
-        if (heightMode == MeasureSpec.EXACTLY) {
-            height = heightSize;
-        } else {
-            // 如果布局里面没有设置固定值,这里取布局的高度的2/5
-            height = heightSize * 2 / 5;
-        }
-
-        setMeasuredDimension(width, height);
-
+    protected void measureComplete() {
+        super.measureComplete();
         int min = Math.min(width, height);
 
         //未设置直径时，给一个默认值
         if (arcDiameter == NOT_SET_DIA) {
             arcDiameter = min - dp2px(20);
         }
-//        //防止弧形半径太大
-//        if (arcDiameter > min) throw new UnsupportedOperationException("arc diameter is too large");
-
-
         //重新确定位置，防止绘图错误
         if (height != width)
             if (min == height) {
@@ -205,35 +160,20 @@ public class PieChartView extends View {
                 arcRectF.set(arcSize, arcSizeW, arcSize + arcDiameter, arcSizeW + arcDiameter);
                 break;
         }
-
-
     }
-
 
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
-//        float top = getTop() - getTitleBarHeight();
-//        float bottom = getBottom();
-//        float right = getRight();
-//        float left = getLeft();
 
         float startAngle = this.startAngle;
         tempRectF.set(arcRectF);
 
-        Logger.e(String.valueOf(arcRectF.left));
-        Logger.e(String.valueOf(arcRectF.top));
-        Logger.e(String.valueOf(arcRectF.right));
-        Logger.e(String.valueOf(arcRectF.bottom));
         float centerX = tempRectF.right - tempRectF.width() / 2;
         float centerY = tempRectF.bottom - tempRectF.height() / 2;
 
-//        MyPointF centerPoint = new MyPointF(centerX, centerY);
-
-//        canvas.drawCircle(centerX,centerY,50,textPaint);
-//        canvas.drawRect(tempRectF,textPaint);
         if (!keyList.isEmpty()) keyList.clear();
-        keyList.addAll(map.keySet());
+        keyList.addAll(getMap().keySet());
         Collections.sort(keyList);
 
         for (int i = 0; i < keyList.size(); i++) {
@@ -268,12 +208,12 @@ public class PieChartView extends View {
     }
 
     private float getOccupyPercent(String key) {
-        return map.get(key) / sum;
+        return getMap().get(key) / sum;
     }
 
     private float calculateSum() {
         sum = 0;
-        for (float num : map.values()) {
+        for (float num : getMap().values()) {
             sum += num;
         }
         return sum;
@@ -305,25 +245,4 @@ public class PieChartView extends View {
         return contentTop - getStatusBarHeight();
     }
 
-    /**
-     * 将px值转换为dip或dp值，保证尺寸大小不变
-     *
-     * @param pxValue px值
-     * @return dp值
-     */
-    public int px2dp(float pxValue) {
-        float scale = getResources().getDisplayMetrics().density;
-        return (int) (pxValue / scale + 0.5f);
-    }
-
-    /**
-     * 将dip或转换为，保证尺寸大小不变
-     *
-     * @param dipValue dp值
-     * @return px值
-     */
-    public int dp2px(float dipValue) {
-        float scale = getResources().getDisplayMetrics().density;
-        return (int) (dipValue * scale + 0.5f);
-    }
 }

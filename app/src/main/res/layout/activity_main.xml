@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fillViewport="true"
-    tools:context="com.laiki.zanq.chart.MainActivity">
+    tools:context=".MainActivity">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -22,8 +22,8 @@
             android:layout_width="match_parent"
             android:layout_height="200dp"
             android:layout_marginTop="20dp"
-            app:arcDiameter="200dp"
-            app:place="top"/>
+            app:arcDiameter="150dp"
+            app:place="center"/>
     </LinearLayout>
 
 

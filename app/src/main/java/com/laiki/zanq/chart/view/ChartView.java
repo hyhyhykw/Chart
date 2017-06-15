@@ -5,27 +5,48 @@ import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 import android.view.View;
 
+import com.laiki.zanq.chart.utils.Logger;
+
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * Created time : 2017/6/13 17:11.
  *
  * @author HY
  */
 
+@SuppressWarnings("unused")
 public abstract class ChartView extends View {
 
     protected int width;
     protected int height;
+    protected Map<String, Float> mMap = new HashMap<>();
+    private Context mContext;
 
     public ChartView(Context context) {
-        super(context);
+        this(context, null);
     }
 
     public ChartView(Context context, @Nullable AttributeSet attrs) {
-        super(context, attrs);
+        this(context, attrs, 0);
     }
 
     public ChartView(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
+        mContext = context;
+        defaultMap();
+    }
+
+    private void defaultMap() {
+        mMap.put("1", 125f);
+        mMap.put("2", 236f);
+        mMap.put("3", 354f);
+        mMap.put("4", 273f);
+        mMap.put("5", 100f);
+        mMap.put("6", 432f);
     }
 
     @Override
@@ -55,7 +76,11 @@ public abstract class ChartView extends View {
         measureComplete();
     }
 
-    protected abstract void measureComplete();
+    /**
+     * 测量完成之后执行的方法
+     */
+    protected void measureComplete() {
+    }
 
     /**
      * 将px值转换为dip或dp值，保证尺寸大小不变
@@ -100,4 +125,41 @@ public abstract class ChartView extends View {
         float fontScale = getResources().getDisplayMetrics().scaledDensity;
         return (int) (spValue * fontScale + 0.5f);
     }
+
+    public void setMap(Map<String, Float> map) {
+        mMap = map;
+        postInvalidate();
+    }
+
+    public Map<String, Float> getMap() {
+        return mMap;
+    }
+
+    /**
+     * 图表相互转换
+     *
+     * @param clazz 需要转换的对象
+     * @param <T>   装换的类型
+     * @return 转换后的图表
+     */
+    @Nullable
+    protected <T extends ChartView> T convertTo(Class<T> clazz) {
+        Constructor<T> con = null;
+        T t = null;
+        try {
+            con = clazz.getConstructor(Context.class);
+            t = con.newInstance(mContext);
+            t.setMap(getMap());
+        } catch (NoSuchMethodException e) {
+            Logger.e("The constructor:" + clazz.getName() + "( " + Context.class.getName() + " )" + " is not exist!", e);
+        } catch (IllegalAccessException e) {
+            Logger.e("Access constructor" + con.getName() + " failed,do you set permissions for it?", e);
+        } catch (InstantiationException e) {
+            Logger.e(e.getMessage());
+        } catch (InvocationTargetException e) {
+            Logger.e(e.getMessage(), e);
+        }
+        return t;
+    }
+
 }
